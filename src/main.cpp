@@ -4,6 +4,7 @@
 #include <learnopengl/shader_s.h>
 
 #include <iostream>
+#include <learnopengl/stb.cpp>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -58,6 +59,35 @@ int main()
          0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f   // top 
          
     };
+
+    float texture[] = {
+        0.0f, 0.0f,  // lower-left corner  
+        1.0f, 0.0f,  // lower-right corner
+        0.5f, 1.0f 
+    };
+
+    unsigned int tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("wood.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "texture" <<std::endl;
+    }
+    stbi_image_free(data);
+
 
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
