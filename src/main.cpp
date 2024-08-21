@@ -6,6 +6,10 @@
 
 #include <iostream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
@@ -15,6 +19,11 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main()
 {
+    /*(glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+    vec = trans * vec;
+    std::cout << vec.x <<vec.y << vec.z << std::endl;*/
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -54,10 +63,10 @@ int main()
     // ------------------------------------------------------------------
     float vertices[] = {
         // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   2.0f, 2.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   2.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 2.0f  // top left 
+         0.1f,  0.1f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+         0.1f, -0.9f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+        -0.9f, -0.9f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+        -0.9f,  0.1f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
     };
     unsigned int indices[] = {
         0, 1, 3, // first triangle
@@ -95,8 +104,8 @@ int main()
     glGenTextures(1, &texture1);
     glBindTexture(GL_TEXTURE_2D, texture1); 
      // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     // set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -147,6 +156,10 @@ int main()
     // or set it via the texture class
     ourShader.setInt("texture2", 1);
 
+    /*glm::mat4 identity = glm::mat4(1.0f);
+   // glm::vec3 scl(0.5f, 0.5f, 0.5f);
+    identity = glm::rotate(identity, glm::radians(90.0f), glm::vec3(0.0,0.0,1.0));
+    identity = glm::scale(identity, glm::vec3(0.5f, 0.5f, 0.5f));*/
 
 
     // render loop
@@ -157,6 +170,10 @@ int main()
         // -----
         processInput(window);
 
+        
+
+
+        
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -169,9 +186,50 @@ int main()
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         // render container
-        ourShader.use();
+
+        //glBindVertexArray(VAO);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        /*glm::mat4 trans2 = glm::mat4(1.0f);
+        trans2 = glm::rotate(trans2, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));        
+        trans2 = glm::scale(trans2, glm::vec3(0.5f, 0.5f, 0.5f));
+        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans2));
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glm::mat4 trans3 = glm::mat4(1.0f);
+        trans3 = glm::translate(trans3, glm::vec3(-0.5f ,0.0f, -0.2f));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans3));
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);*/
+        glm::mat4 origin = glm::mat4(1.0f);
+        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(origin));
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        float counter = 1.0f;
+        float scale = .75f;
+        float addedLocation = 1.0f - (1.0f-scale)/2;
+        float thin = 1.0f;
+
+        while (counter < 10.0f)
+        {
+            glm::mat4 triangle = glm::mat4(1.0f);
+            //triangle = glm::translate(triangle, glm::vec3(thin - (thin-scale)/2, thin - (thin-scale)/2, 0.0f));
+            triangle = glm::scale(triangle, glm::vec3(scale, scale, 1.0f));
+            //triangle = glm::translate(triangle, glm::vec3(addedLocation + scale/2 , addedLocation + scale/2, 0.0f));
+            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(triangle));
+            glBindVertexArray(VAO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            counter += 1.0f;
+            thin += scale;
+            scale = powf(0.75f, counter);
+            
+            
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
