@@ -273,8 +273,12 @@ int main()
     unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
     unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
     unsigned int projectionLoc = glGetUniformLocation(ourShader.ID, "projection");
-        glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f,0.0f,-3.0f));
+        //glm::mat4 view = glm::mat4(1.0f);
+        //view = glm::translate(view, glm::vec3(0.0f,0.0f,-3.0f));
+        float camx = 2.0f * sin(glfwGetTime());
+        float camz = 2.0f * cos(glfwGetTime());
+        glm::mat4 view;
+        view = glm::lookAt(glm::vec3(camx,0.0f,camz), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(45.0f), float(width)/float(height), 0.1f, 100.0f);
@@ -282,7 +286,7 @@ int main()
        for (float i = 0.0f; i < 9.0f; i++)
        {
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3((float)cos(i/(2.0f*3.14)) -0.6f, (float)cos(i/(2.0f*3.14))/1.2f -0.6f, (float)cos(i/(2.0f*3.14))));
+        model = glm::translate(model, glm::vec3(0.0f, i/4.5f -1.2f , camx/10.0f));
         model = glm::rotate(model, glm::radians(i), glm::vec3(1.0f, 0.0f , 0.0f));
         model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
