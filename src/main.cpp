@@ -23,6 +23,14 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float fov = 45.0f;
 bool firstMouse = true;
+bool beginningFalling = true;
+//gravity Physics
+
+bool isGrounded = false;
+
+glm::vec3 cubePosition = glm::vec3(0.0f, 10.0f, 0.0f); // Initial position
+glm::vec3 cubeVelocity = glm::vec3(0.0f, 0.0f, 0.0f); // Initial velocity
+glm::vec3 gravity = glm::vec3(0.0f, -3.8f, 0.0f); 
 
 glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 camFront = glm::vec3(0.0f,0.0f, -1.0f);
@@ -245,91 +253,71 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
-        // render container
+        //floor
+        glm::mat4 floor = glm::mat4(1.0f);
+        floor = glm::scale(floor, glm::vec3(2.0f, 0.01f, 2.0f));
+        floor = glm::translate(floor, glm::vec3(0.0f, -5.0f, 0.0f));
+        //cubeGravity
 
-        //glBindVertexArray(VAO);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        /*glm::mat4 trans2 = glm::mat4(1.0f);
-        trans2 = glm::rotate(trans2, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));        
-        trans2 = glm::scale(trans2, glm::vec3(0.5f, 0.5f, 0.5f));
-        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans2));
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        glm::mat4 trans3 = glm::mat4(1.0f);
-        trans3 = glm::translate(trans3, glm::vec3(-0.5f ,0.0f, -0.2f));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans3));
-
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);*/
-        /*glm::mat4 origin = glm::mat4(1.0f);
-        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(origin));
-
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        float counter = 1.0f;
-        float scale = .75f;
-        float addedLocation = 1.0f - (1.0f-scale)/2;
-        float thin = 1.0f;
-
-        while (counter < 10.0f)
+        glm::mat4 TD = glm::mat4(1.0f);
+        
+        
+        if (isGrounded == false  && beginningFalling == false)
         {
-            glm::mat4 triangle = glm::mat4(1.0f);
-            //triangle = glm::translate(triangle, glm::vec3(thin - (thin-scale)/2, thin - (thin-scale)/2, 0.0f));
-            triangle = glm::scale(triangle, glm::vec3(scale, scale, 1.0f));
-            //triangle = glm::translate(triangle, glm::vec3(addedLocation + scale/2 , addedLocation + scale/2, 0.0f));
-            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(triangle));
-            glBindVertexArray(VAO);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-            counter += 1.0f;
-            thin += scale;
-            scale = powf(0.75f, counter);
+            //currentFrame = glfwgettime()
             
+            cubeVelocity += gravity * deltaTime;
+            cubePosition += cubeVelocity * deltaTime;
+            TD = glm::translate(TD, cubePosition);
+            std::cout<<&TD[1]<< "  trap  "<< glm::value_ptr(floor) <<std::endl;
+            if (&TD[1] <= &floor[1])
+            {
+                isGrounded=true;
+            }
+        }
+        else if (isGrounded == false && beginningFalling == true)
+        {
+            //currentFrame = glfwgettime()
+            beginningFalling = false;
             
-        }*/
-
+        }
+        TD = glm::translate(TD, glm::vec3(0.0, 5.0f, -5.0f));
+        //TD = glm::scale(TD, glm::vec3(0.5f, 0.5f, 0.5f));
        float counter = 1.0f;
     unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
     unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
     unsigned int projectionLoc = glGetUniformLocation(ourShader.ID, "projection");
-        //glm::mat4 view = glm::mat4(1.0f);
-        //view = glm::translate(view, glm::vec3(0.0f,0.0f,-3.0f));
+        
         float camx = 2.0f * sin(glfwGetTime());
         float camz = 2.0f * cos(glfwGetTime());
+
         glm::mat4 view;
         view = glm::lookAt(camPos, camFront + camPos, camUp);
 
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(45.0f), float(width)/float(height), 0.1f, 100.0f);
        
-       for (float i = 0.0f; i < 9.0f; i++)
-       {
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, i/4.5f -1.2f , camx/10.0f));
-        model = glm::rotate(model, glm::radians(i), glm::vec3(1.0f, 0.0f , 0.0f));
-        model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-       }
-        //first top and bottom faces
-        glm::mat4 TD = glm::mat4(1.0f);
-        /*TD = glm::translate(TD, glm::vec3(0.0f, 0.0f, -.3f));
-        TD = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
-        TD = glm::perspective(glm::radians(45.0f), (float)width/(float)height, 0.1f, 100.0f);*/
-        TD = glm::rotate(TD, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+       
+        
+        //TD = glm::translate(TD, glm::vec3(0.0f, 0.0f, -.3f));
+        //TD = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
+        //TD = glm::perspective(glm::radians(45.0f), (float)width/(float)height, 0.1f, 100.0f);
+        //TD = glm::rotate(TD, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
 
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(TD));
         glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(floor));
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
         
 
         /*TD = glm::translate(TD, glm::vec3(0.0f, .8f, 0.0f));
